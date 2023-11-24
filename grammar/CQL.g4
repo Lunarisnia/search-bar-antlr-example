@@ -1,48 +1,37 @@
 grammar CQL;
 
-fragment RAW_TEXT: [a-zA-Z0-9];
-
-RAWTEXT:
-	(
-		RAW_TEXT
-		| ' '
-		| '~'
-		| '`'
-		| '!'
-		| '@'
-		| '#'
-		| '$'
-		| '%'
-		| '^'
-		| '&'
-		| '*'
-		| '('
-		| ')'
-		| '_'
-		| '-'
-		| '+'
-		| '='
-		| '{'
-		| '}'
-		| '['
-		| ']'
-		| '|'
-		| '\\'
-		| ':'
-		| '\''
-		| '"'
-		| '<'
-		| '>'
-		| ','
-		| '.'
-		| '/'
-		| '?'
-	) {console.log("Hello, World")};
-
-CATEGORY: 'category:';
 SEMICOLON: ';';
+COMMA: ',';
 
-program: rawText EOF | (searchCategory)* EOF;
+fragment RAW_TEXT: (. | ~[\n\r,;]);
+
+MORETHAN: '>';
+RAWTEXT: (RAW_TEXT RAW_TEXT*?);
+CATEGORY: 'category:';
+BRAND: 'brand:';
+PRICE: 'price:';
+
+
+program:
+	rawText EOF
+	| (
+		searchCategory
+		| searchCategory
+		| searchPrice
+		| searchBrand
+	)* (
+		SEMICOLON (
+			rawText
+			| searchCategory
+			| searchPrice
+			| searchBrand
+		)
+	)*? EOF;
 
 rawText: RAWTEXT*;
-searchCategory: CATEGORY rawText;
+
+expression: MORETHAN rawText;
+
+searchPrice: PRICE (expression);
+searchBrand: BRAND rawText (COMMA rawText)*?;
+searchCategory: CATEGORY rawText (COMMA rawText)*?;
