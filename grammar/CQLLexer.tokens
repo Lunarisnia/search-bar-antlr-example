@@ -1,0 +1,5 @@
+RAWTEXT=1
+CATEGORY=2
+SEMICOLON=3
+'category:'=2
+';'=3
