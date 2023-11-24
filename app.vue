@@ -5,27 +5,12 @@
         <center>
           <h1>Cooler Cosmart</h1>
         </center>
-        <v-text-field
-          density="compact"
-          placeholder="What are you thinking?"
-          prepend-inner-icon="mdi-magnify"
-          variant="outlined"
-          v-model="searchQuery"
-          @change="showCards"
-        ></v-text-field>
+        <v-text-field density="compact" placeholder="What are you thinking?" prepend-inner-icon="mdi-magnify"
+          variant="outlined" v-model="searchQuery" @change="showCards"></v-text-field>
         <center>
           <v-row>
-            <v-col
-              v-bind:key="item.name"
-              v-for="item in items"
-              align-self="center"
-            >
-              <ItemCard
-                :productName="item.name"
-                :category="item.category"
-                :brand="item.brand"
-                :price="item.price"
-              />
+            <v-col v-bind:key="item.name" v-for="item in items" align-self="center">
+              <ItemCard :productName="item.name" :category="item.category" :brand="item.brand" :price="item.price" />
             </v-col>
           </v-row>
         </center>
@@ -37,7 +22,7 @@
 <script lang="ts">
 import { CharStream, CommonTokenStream } from "antlr4";
 import CQLLexer from "./grammar/CQLLexer";
-import CQLParser, { ProgramContext } from "./grammar/CQLParser";
+import CQLParser, { ProgramContext, RawTextContext, SearchBrandContext, SearchCategoryContext, SearchPriceContext, SemicolonContext } from "./grammar/CQLParser";
 import CQLVisitor from "./grammar/CQLVisitor";
 
 class CustomVisitor<Result> extends CQLVisitor<Result> {
@@ -46,9 +31,51 @@ class CustomVisitor<Result> extends CQLVisitor<Result> {
   }
 
   visitProgram: (ctx: ProgramContext) => Result = (ctx: ProgramContext) => {
-    console.log("FOOOBARR");
-    return "A" as Result;
+    let treeMap = {};
+    for (const child of ctx.children || []) {
+      const childResult = this.visit(child) as any
+      if (childResult) {
+        const keys = Object.keys(childResult);
+        if (treeMap.hasOwnProperty(keys[0])) {
+          continue;
+        }
+        treeMap = {
+          ...treeMap,
+          ...this.visit(child) as any,
+        }
+      }
+    }
+    return treeMap as Result;
   };
+
+  visitSearchCategory: (ctx: SearchCategoryContext) => Result = (ctx: SearchCategoryContext) => {
+    const desiredCategories = [];
+    for (const rawText of ctx.rawText_list()) {
+      desiredCategories.push(rawText.getText());
+    }
+    return { "searchCategory": desiredCategories } as Result;
+  }
+
+  visitRawText: (ctx: RawTextContext) => Result = (ctx: RawTextContext) => {
+    return { "rawText": ctx.getText() } as Result;
+  }
+
+  visitSemicolon: (ctx: SemicolonContext) => Result = (ctx: SemicolonContext) => {
+    return { "semicolon": ctx.getText() } as Result;
+  }
+
+  visitSearchBrand: (ctx: SearchBrandContext) => Result = (ctx: SearchBrandContext) => {
+    const desiredBrands = [];
+    for (const rawText of ctx.rawText_list()) {
+      desiredBrands.push(rawText.getText());
+    }
+    return { "searchBrand": desiredBrands } as Result;
+  }
+
+  // TODO: Get the logic symbol and pass it as object
+  visitSearchPrice: (ctx: SearchPriceContext) => Result = (ctx: SearchPriceContext) => {
+    return "" as Result;
+  }
 }
 
 export default {
@@ -78,13 +105,13 @@ export default {
       ],
     };
   },
-  mounted: () => {},
+  mounted: () => { },
   methods: {
-    showCards() {},
+    showCards() { },
   },
   // computed: {
   //   parsedQuery: function () {
-      
+
   //     return this.searchQuery;
   //   },
   // },
@@ -101,7 +128,8 @@ export default {
         console.log("Syntax Errors");
       } else {
         const visitor = new CustomVisitor<any>();
-        visitor.visit(tree);
+        const result = visitor.visit(tree);
+        console.log(result);
       }
     }
   }
