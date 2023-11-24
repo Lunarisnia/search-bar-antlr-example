@@ -5,6 +5,7 @@ import {ParseTreeListener} from "antlr4";
 
 import { ProgramContext } from "./CQLParser";
 import { RawTextContext } from "./CQLParser";
+import { SemicolonContext } from "./CQLParser";
 import { ExpressionContext } from "./CQLParser";
 import { SearchPriceContext } from "./CQLParser";
 import { SearchBrandContext } from "./CQLParser";
@@ -36,6 +37,16 @@ export default class CQLListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitRawText?: (ctx: RawTextContext) => void;
+	/**
+	 * Enter a parse tree produced by `CQLParser.semicolon`.
+	 * @param ctx the parse tree
+	 */
+	enterSemicolon?: (ctx: SemicolonContext) => void;
+	/**
+	 * Exit a parse tree produced by `CQLParser.semicolon`.
+	 * @param ctx the parse tree
+	 */
+	exitSemicolon?: (ctx: SemicolonContext) => void;
 	/**
 	 * Enter a parse tree produced by `CQLParser.expression`.
 	 * @param ctx the parse tree

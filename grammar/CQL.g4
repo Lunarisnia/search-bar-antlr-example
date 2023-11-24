@@ -20,7 +20,7 @@ program:
 		| searchPrice
 		| searchBrand
 	)* (
-		SEMICOLON (
+		semicolon (
 			rawText
 			| searchCategory
 			| searchPrice
@@ -29,6 +29,8 @@ program:
 	)*? EOF;
 
 rawText: RAWTEXT*;
+
+semicolon: SEMICOLON;
 
 expression: MORETHAN rawText;
 

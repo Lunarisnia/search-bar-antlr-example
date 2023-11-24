@@ -5,6 +5,7 @@ import {ParseTreeVisitor} from 'antlr4';
 
 import { ProgramContext } from "./CQLParser";
 import { RawTextContext } from "./CQLParser";
+import { SemicolonContext } from "./CQLParser";
 import { ExpressionContext } from "./CQLParser";
 import { SearchPriceContext } from "./CQLParser";
 import { SearchBrandContext } from "./CQLParser";
@@ -31,6 +32,12 @@ export default class CQLVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitRawText?: (ctx: RawTextContext) => Result;
+	/**
+	 * Visit a parse tree produced by `CQLParser.semicolon`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitSemicolon?: (ctx: SemicolonContext) => Result;
 	/**
 	 * Visit a parse tree produced by `CQLParser.expression`.
 	 * @param ctx the parse tree
