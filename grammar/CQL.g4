@@ -6,11 +6,14 @@ COMMA: ',';
 fragment RAW_TEXT: (. | ~[\n\r,;]);
 
 MORETHAN: '>';
+LESSTHAN: '<';
+LESSTHANEQUAL: '<=';
+MORETHANEQUAL: '>=';
+AND: '&&';
 RAWTEXT: (RAW_TEXT RAW_TEXT*?);
 CATEGORY: 'category:';
 BRAND: 'brand:';
 PRICE: 'price:';
-
 
 program:
 	rawText EOF
@@ -32,7 +35,9 @@ rawText: RAWTEXT*;
 
 semicolon: SEMICOLON;
 
-expression: MORETHAN rawText;
+expression: (MORETHAN | LESSTHAN | LESSTHANEQUAL | MORETHANEQUAL) rawText (
+		AND (MORETHAN | LESSTHAN | LESSTHANEQUAL | MORETHANEQUAL) rawText
+	)?;
 
 searchPrice: PRICE (expression);
 searchBrand: BRAND rawText (COMMA rawText)*?;

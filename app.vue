@@ -22,7 +22,7 @@
 <script lang="ts">
 import { CharStream, CommonTokenStream } from "antlr4";
 import CQLLexer from "./grammar/CQLLexer";
-import CQLParser, { ProgramContext, RawTextContext, SearchBrandContext, SearchCategoryContext, SearchPriceContext, SemicolonContext } from "./grammar/CQLParser";
+import CQLParser, { ExpressionContext, ProgramContext, RawTextContext, SearchBrandContext, SearchCategoryContext, SearchPriceContext, SemicolonContext } from "./grammar/CQLParser";
 import CQLVisitor from "./grammar/CQLVisitor";
 
 class CustomVisitor<Result> extends CQLVisitor<Result> {
@@ -72,9 +72,29 @@ class CustomVisitor<Result> extends CQLVisitor<Result> {
     return { "searchBrand": desiredBrands } as Result;
   }
 
-  // TODO: Get the logic symbol and pass it as object
   visitSearchPrice: (ctx: SearchPriceContext) => Result = (ctx: SearchPriceContext) => {
-    return "" as Result;
+    const expression = this.visit(ctx.expression())
+    return { "searchPrice": expression } as Result;
+  }
+
+  visitExpression: (ctx: ExpressionContext) => Result = (ctx: ExpressionContext) => {
+    let expression = {};
+    expression = {
+      ...expression,
+      "operator": ctx.getChild(0)?.getText(),
+      "value": ctx.rawText(0).getText()
+    }
+
+    if (ctx.AND()) {
+      expression = {
+        ...expression,
+        "and": {
+          "operator": ctx.getChild(3)?.getText(),
+          "value": ctx.rawText(1).getText()
+        }
+      }
+    }
+    return expression as Result;
   }
 }
 

@@ -22,10 +22,14 @@ export default class CQLParser extends Parser {
 	public static readonly SEMICOLON = 1;
 	public static readonly COMMA = 2;
 	public static readonly MORETHAN = 3;
-	public static readonly RAWTEXT = 4;
-	public static readonly CATEGORY = 5;
-	public static readonly BRAND = 6;
-	public static readonly PRICE = 7;
+	public static readonly LESSTHAN = 4;
+	public static readonly LESSTHANEQUAL = 5;
+	public static readonly MORETHANEQUAL = 6;
+	public static readonly AND = 7;
+	public static readonly RAWTEXT = 8;
+	public static readonly CATEGORY = 9;
+	public static readonly BRAND = 10;
+	public static readonly PRICE = 11;
 	public static readonly EOF = Token.EOF;
 	public static readonly RULE_program = 0;
 	public static readonly RULE_rawText = 1;
@@ -36,12 +40,17 @@ export default class CQLParser extends Parser {
 	public static readonly RULE_searchCategory = 6;
 	public static readonly literalNames: (string | null)[] = [ null, "';'", 
                                                             "','", "'>'", 
+                                                            "'<'", "'<='", 
+                                                            "'>='", "'&&'", 
                                                             null, "'category:'", 
                                                             "'brand:'", 
                                                             "'price:'" ];
 	public static readonly symbolicNames: (string | null)[] = [ null, "SEMICOLON", 
                                                              "COMMA", "MORETHAN", 
-                                                             "RAWTEXT", 
+                                                             "LESSTHAN", 
+                                                             "LESSTHANEQUAL", 
+                                                             "MORETHANEQUAL", 
+                                                             "AND", "RAWTEXT", 
                                                              "CATEGORY", 
                                                              "BRAND", "PRICE" ];
 	// tslint:disable:no-trailing-whitespace
@@ -88,7 +97,7 @@ export default class CQLParser extends Parser {
 				this.state = 23;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while ((((_la) & ~0x1F) === 0 && ((1 << _la) & 224) !== 0)) {
+				while ((((_la) & ~0x1F) === 0 && ((1 << _la) & 3584) !== 0)) {
 					{
 					this.state = 21;
 					this._errHandler.sync(this);
@@ -137,25 +146,25 @@ export default class CQLParser extends Parser {
 						switch (this._input.LA(1)) {
 						case -1:
 						case 1:
-						case 4:
+						case 8:
 							{
 							this.state = 27;
 							this.rawText();
 							}
 							break;
-						case 5:
+						case 9:
 							{
 							this.state = 28;
 							this.searchCategory();
 							}
 							break;
-						case 7:
+						case 11:
 							{
 							this.state = 29;
 							this.searchPrice();
 							}
 							break;
-						case 6:
+						case 10:
 							{
 							this.state = 30;
 							this.searchBrand();
@@ -202,7 +211,7 @@ export default class CQLParser extends Parser {
 			this.state = 44;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			while (_la===4) {
+			while (_la===8) {
 				{
 				{
 				this.state = 41;
@@ -258,13 +267,42 @@ export default class CQLParser extends Parser {
 	public expression(): ExpressionContext {
 		let localctx: ExpressionContext = new ExpressionContext(this, this._ctx, this.state);
 		this.enterRule(localctx, 6, CQLParser.RULE_expression);
+		let _la: number;
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
 			this.state = 49;
-			this.match(CQLParser.MORETHAN);
+			_la = this._input.LA(1);
+			if(!((((_la) & ~0x1F) === 0 && ((1 << _la) & 120) !== 0))) {
+			this._errHandler.recoverInline(this);
+			}
+			else {
+				this._errHandler.reportMatch(this);
+			    this.consume();
+			}
 			this.state = 50;
 			this.rawText();
+			this.state = 54;
+			this._errHandler.sync(this);
+			_la = this._input.LA(1);
+			if (_la===7) {
+				{
+				this.state = 51;
+				this.match(CQLParser.AND);
+				this.state = 52;
+				_la = this._input.LA(1);
+				if(!((((_la) & ~0x1F) === 0 && ((1 << _la) & 120) !== 0))) {
+				this._errHandler.recoverInline(this);
+				}
+				else {
+					this._errHandler.reportMatch(this);
+				    this.consume();
+				}
+				this.state = 53;
+				this.rawText();
+				}
+			}
+
 			}
 		}
 		catch (re) {
@@ -288,10 +326,10 @@ export default class CQLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 52;
+			this.state = 56;
 			this.match(CQLParser.PRICE);
 			{
-			this.state = 53;
+			this.state = 57;
 			this.expression();
 			}
 			}
@@ -318,27 +356,27 @@ export default class CQLParser extends Parser {
 			let _alt: number;
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 55;
+			this.state = 59;
 			this.match(CQLParser.BRAND);
-			this.state = 56;
+			this.state = 60;
 			this.rawText();
-			this.state = 61;
+			this.state = 65;
 			this._errHandler.sync(this);
-			_alt = this._interp.adaptivePredict(this._input, 6, this._ctx);
+			_alt = this._interp.adaptivePredict(this._input, 7, this._ctx);
 			while (_alt !== 1 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1 + 1) {
 					{
 					{
-					this.state = 57;
+					this.state = 61;
 					this.match(CQLParser.COMMA);
-					this.state = 58;
+					this.state = 62;
 					this.rawText();
 					}
 					}
 				}
-				this.state = 63;
+				this.state = 67;
 				this._errHandler.sync(this);
-				_alt = this._interp.adaptivePredict(this._input, 6, this._ctx);
+				_alt = this._interp.adaptivePredict(this._input, 7, this._ctx);
 			}
 			}
 		}
@@ -364,27 +402,27 @@ export default class CQLParser extends Parser {
 			let _alt: number;
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 64;
+			this.state = 68;
 			this.match(CQLParser.CATEGORY);
-			this.state = 65;
+			this.state = 69;
 			this.rawText();
-			this.state = 70;
+			this.state = 74;
 			this._errHandler.sync(this);
-			_alt = this._interp.adaptivePredict(this._input, 7, this._ctx);
+			_alt = this._interp.adaptivePredict(this._input, 8, this._ctx);
 			while (_alt !== 1 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1 + 1) {
 					{
 					{
-					this.state = 66;
+					this.state = 70;
 					this.match(CQLParser.COMMA);
-					this.state = 67;
+					this.state = 71;
 					this.rawText();
 					}
 					}
 				}
-				this.state = 72;
+				this.state = 76;
 				this._errHandler.sync(this);
-				_alt = this._interp.adaptivePredict(this._input, 7, this._ctx);
+				_alt = this._interp.adaptivePredict(this._input, 8, this._ctx);
 			}
 			}
 		}
@@ -403,28 +441,29 @@ export default class CQLParser extends Parser {
 		return localctx;
 	}
 
-	public static readonly _serializedATN: number[] = [4,1,7,74,2,0,7,0,2,1,
-	7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,1,0,1,0,1,0,1,0,1,0,1,0,1,0,
-	5,0,22,8,0,10,0,12,0,25,9,0,1,0,1,0,1,0,1,0,1,0,3,0,32,8,0,5,0,34,8,0,10,
-	0,12,0,37,9,0,1,0,3,0,40,8,0,1,1,5,1,43,8,1,10,1,12,1,46,9,1,1,2,1,2,1,
-	3,1,3,1,3,1,4,1,4,1,4,1,5,1,5,1,5,1,5,5,5,60,8,5,10,5,12,5,63,9,5,1,6,1,
-	6,1,6,1,6,5,6,69,8,6,10,6,12,6,72,9,6,1,6,3,35,61,70,0,7,0,2,4,6,8,10,12,
-	0,0,78,0,39,1,0,0,0,2,44,1,0,0,0,4,47,1,0,0,0,6,49,1,0,0,0,8,52,1,0,0,0,
-	10,55,1,0,0,0,12,64,1,0,0,0,14,15,3,2,1,0,15,16,5,0,0,1,16,40,1,0,0,0,17,
-	22,3,12,6,0,18,22,3,12,6,0,19,22,3,8,4,0,20,22,3,10,5,0,21,17,1,0,0,0,21,
-	18,1,0,0,0,21,19,1,0,0,0,21,20,1,0,0,0,22,25,1,0,0,0,23,21,1,0,0,0,23,24,
-	1,0,0,0,24,35,1,0,0,0,25,23,1,0,0,0,26,31,3,4,2,0,27,32,3,2,1,0,28,32,3,
-	12,6,0,29,32,3,8,4,0,30,32,3,10,5,0,31,27,1,0,0,0,31,28,1,0,0,0,31,29,1,
-	0,0,0,31,30,1,0,0,0,32,34,1,0,0,0,33,26,1,0,0,0,34,37,1,0,0,0,35,36,1,0,
-	0,0,35,33,1,0,0,0,36,38,1,0,0,0,37,35,1,0,0,0,38,40,5,0,0,1,39,14,1,0,0,
-	0,39,23,1,0,0,0,40,1,1,0,0,0,41,43,5,4,0,0,42,41,1,0,0,0,43,46,1,0,0,0,
-	44,42,1,0,0,0,44,45,1,0,0,0,45,3,1,0,0,0,46,44,1,0,0,0,47,48,5,1,0,0,48,
-	5,1,0,0,0,49,50,5,3,0,0,50,51,3,2,1,0,51,7,1,0,0,0,52,53,5,7,0,0,53,54,
-	3,6,3,0,54,9,1,0,0,0,55,56,5,6,0,0,56,61,3,2,1,0,57,58,5,2,0,0,58,60,3,
-	2,1,0,59,57,1,0,0,0,60,63,1,0,0,0,61,62,1,0,0,0,61,59,1,0,0,0,62,11,1,0,
-	0,0,63,61,1,0,0,0,64,65,5,5,0,0,65,70,3,2,1,0,66,67,5,2,0,0,67,69,3,2,1,
-	0,68,66,1,0,0,0,69,72,1,0,0,0,70,71,1,0,0,0,70,68,1,0,0,0,71,13,1,0,0,0,
-	72,70,1,0,0,0,8,21,23,31,35,39,44,61,70];
+	public static readonly _serializedATN: number[] = [4,1,11,78,2,0,7,0,2,
+	1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,1,0,1,0,1,0,1,0,1,0,1,0,1,
+	0,5,0,22,8,0,10,0,12,0,25,9,0,1,0,1,0,1,0,1,0,1,0,3,0,32,8,0,5,0,34,8,0,
+	10,0,12,0,37,9,0,1,0,3,0,40,8,0,1,1,5,1,43,8,1,10,1,12,1,46,9,1,1,2,1,2,
+	1,3,1,3,1,3,1,3,1,3,3,3,55,8,3,1,4,1,4,1,4,1,5,1,5,1,5,1,5,5,5,64,8,5,10,
+	5,12,5,67,9,5,1,6,1,6,1,6,1,6,5,6,73,8,6,10,6,12,6,76,9,6,1,6,3,35,65,74,
+	0,7,0,2,4,6,8,10,12,0,1,1,0,3,6,83,0,39,1,0,0,0,2,44,1,0,0,0,4,47,1,0,0,
+	0,6,49,1,0,0,0,8,56,1,0,0,0,10,59,1,0,0,0,12,68,1,0,0,0,14,15,3,2,1,0,15,
+	16,5,0,0,1,16,40,1,0,0,0,17,22,3,12,6,0,18,22,3,12,6,0,19,22,3,8,4,0,20,
+	22,3,10,5,0,21,17,1,0,0,0,21,18,1,0,0,0,21,19,1,0,0,0,21,20,1,0,0,0,22,
+	25,1,0,0,0,23,21,1,0,0,0,23,24,1,0,0,0,24,35,1,0,0,0,25,23,1,0,0,0,26,31,
+	3,4,2,0,27,32,3,2,1,0,28,32,3,12,6,0,29,32,3,8,4,0,30,32,3,10,5,0,31,27,
+	1,0,0,0,31,28,1,0,0,0,31,29,1,0,0,0,31,30,1,0,0,0,32,34,1,0,0,0,33,26,1,
+	0,0,0,34,37,1,0,0,0,35,36,1,0,0,0,35,33,1,0,0,0,36,38,1,0,0,0,37,35,1,0,
+	0,0,38,40,5,0,0,1,39,14,1,0,0,0,39,23,1,0,0,0,40,1,1,0,0,0,41,43,5,8,0,
+	0,42,41,1,0,0,0,43,46,1,0,0,0,44,42,1,0,0,0,44,45,1,0,0,0,45,3,1,0,0,0,
+	46,44,1,0,0,0,47,48,5,1,0,0,48,5,1,0,0,0,49,50,7,0,0,0,50,54,3,2,1,0,51,
+	52,5,7,0,0,52,53,7,0,0,0,53,55,3,2,1,0,54,51,1,0,0,0,54,55,1,0,0,0,55,7,
+	1,0,0,0,56,57,5,11,0,0,57,58,3,6,3,0,58,9,1,0,0,0,59,60,5,10,0,0,60,65,
+	3,2,1,0,61,62,5,2,0,0,62,64,3,2,1,0,63,61,1,0,0,0,64,67,1,0,0,0,65,66,1,
+	0,0,0,65,63,1,0,0,0,66,11,1,0,0,0,67,65,1,0,0,0,68,69,5,9,0,0,69,74,3,2,
+	1,0,70,71,5,2,0,0,71,73,3,2,1,0,72,70,1,0,0,0,73,76,1,0,0,0,74,75,1,0,0,
+	0,74,72,1,0,0,0,75,13,1,0,0,0,76,74,1,0,0,0,9,21,23,31,35,39,44,54,65,74];
 
 	private static __ATN: ATN;
 	public static get _ATN(): ATN {
@@ -574,11 +613,38 @@ export class ExpressionContext extends ParserRuleContext {
 		super(parent, invokingState);
     	this.parser = parser;
 	}
-	public MORETHAN(): TerminalNode {
-		return this.getToken(CQLParser.MORETHAN, 0);
+	public rawText_list(): RawTextContext[] {
+		return this.getTypedRuleContexts(RawTextContext) as RawTextContext[];
 	}
-	public rawText(): RawTextContext {
-		return this.getTypedRuleContext(RawTextContext, 0) as RawTextContext;
+	public rawText(i: number): RawTextContext {
+		return this.getTypedRuleContext(RawTextContext, i) as RawTextContext;
+	}
+	public MORETHAN_list(): TerminalNode[] {
+	    	return this.getTokens(CQLParser.MORETHAN);
+	}
+	public MORETHAN(i: number): TerminalNode {
+		return this.getToken(CQLParser.MORETHAN, i);
+	}
+	public LESSTHAN_list(): TerminalNode[] {
+	    	return this.getTokens(CQLParser.LESSTHAN);
+	}
+	public LESSTHAN(i: number): TerminalNode {
+		return this.getToken(CQLParser.LESSTHAN, i);
+	}
+	public LESSTHANEQUAL_list(): TerminalNode[] {
+	    	return this.getTokens(CQLParser.LESSTHANEQUAL);
+	}
+	public LESSTHANEQUAL(i: number): TerminalNode {
+		return this.getToken(CQLParser.LESSTHANEQUAL, i);
+	}
+	public MORETHANEQUAL_list(): TerminalNode[] {
+	    	return this.getTokens(CQLParser.MORETHANEQUAL);
+	}
+	public MORETHANEQUAL(i: number): TerminalNode {
+		return this.getToken(CQLParser.MORETHANEQUAL, i);
+	}
+	public AND(): TerminalNode {
+		return this.getToken(CQLParser.AND, 0);
 	}
     public get ruleIndex(): number {
     	return CQLParser.RULE_expression;
