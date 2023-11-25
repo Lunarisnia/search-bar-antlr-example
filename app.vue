@@ -6,10 +6,10 @@
           <h1>Cooler Cosmart</h1>
         </center>
         <v-text-field density="compact" placeholder="What are you thinking?" prepend-inner-icon="mdi-magnify"
-          variant="outlined" v-model="searchQuery" @change="showCards"></v-text-field>
+          variant="outlined" v-model="searchQuery"></v-text-field>
         <center>
           <v-row>
-            <v-col v-bind:key="item.name" v-for="item in items" align-self="center">
+            <v-col v-bind:key="item.name" v-for="item in filteredCards" align-self="center">
               <ItemCard :productName="item.name" :category="item.category" :brand="item.brand" :price="item.price" />
             </v-col>
           </v-row>
@@ -101,40 +101,171 @@ class CustomVisitor<Result> extends CQLVisitor<Result> {
 export default {
   data: () => {
     return {
+      searchQueryTree: {} as any,
+
       searchQuery: "",
       categories: ["Electronic", "Skincare", "Toy"],
       items: [
         {
+          id: 1,
           name: "Redmi 69420",
           brand: "Xiaomi",
           category: "Electronic",
           price: 30,
         },
         {
+          id: 2,
           name: "Pocopon 6969",
           brand: "Xiaomi",
           category: "Electronic",
           price: 20,
         },
         {
+          id: 3,
           name: "Samsung Galaxy Z Fold 69",
           brand: "Samsung",
           category: "Electronic",
           price: 69,
         },
+        {
+          id: 4,
+          name: "Methamphetamine",
+          brand: "Heisenberg",
+          category: "Skincare",
+          price: 420,
+        },
+        {
+          id: 5,
+          name: "M4A1-S",
+          brand: "America",
+          category: "Toy",
+          price: 5,
+        },
+        {
+          id: 6,
+          name: "PlayStation 5",
+          brand: "Sony",
+          category: "Toy",
+          price: 32,
+        },
+        {
+          id: 7,
+          name: "Nintendo 3DS",
+          brand: "Nintendo",
+          category: "Toy",
+          price: 999,
+        },
+        {
+          id: 8,
+          name: "Opium",
+          brand: "Heisenberg",
+          category: "Skincare",
+          price: 999,
+        },
+        {
+          id: 9,
+          name: "Lip Balm",
+          brand: "Wardah",
+          category: "Skincare",
+          price: 341,
+        },
       ],
     };
   },
+  // This does nothing just make things harder to read because fuck you
   mounted: () => { },
-  methods: {
-    showCards() { },
-  },
-  // computed: {
-  //   parsedQuery: function () {
+  computed: {
+    // This is incredibly complex for no reason because I am such a good programmer :)
+    filteredCards: function () {
+      // Get all the keys from the parse tree
+      const treeKeys = Object.keys(this.searchQueryTree);
 
-  //     return this.searchQuery;
-  //   },
-  // },
+      // If there is nothing in the parse tree then just show all
+      if (treeKeys.length < 1)
+        return this.items;
+
+      let filtered = [];
+      if (treeKeys.includes("rawText")) {
+        filtered.push(this.items.filter((item) => item.name.toLowerCase().includes(this.searchQueryTree.rawText.toLowerCase())));
+      }
+
+      if (treeKeys.includes("searchCategory")) {
+        filtered.push(this.items.filter((item) => this.searchQueryTree.searchCategory.includes(item.category)));
+      }
+
+      if (treeKeys.includes("searchBrand")) {
+        filtered.push(this.items.filter((item) => this.searchQueryTree.searchBrand.includes(item.brand)));
+      }
+
+      if (treeKeys.includes("searchPrice")) {
+        let localFiltered: any[] = [];
+        const searchPrice = this.searchQueryTree.searchPrice;
+        switch (searchPrice.operator) {
+          case ">":
+            localFiltered = this.items.filter((item) => item.price > parseInt(searchPrice.value))
+            break;
+          case ">=":
+            localFiltered = this.items.filter((item) => item.price >= parseInt(searchPrice.value))
+            break;
+          case "<":
+            localFiltered = this.items.filter((item) => item.price < parseInt(searchPrice.value))
+            break;
+          case "<=":
+            localFiltered = this.items.filter((item) => item.price <= parseInt(searchPrice.value))
+            break;
+
+          default:
+            break;
+        }
+        if (searchPrice.and) {
+          switch (searchPrice.and.operator) {
+            case ">":
+              localFiltered = localFiltered.filter((item) => item.price > parseInt(searchPrice.and.value))
+              break;
+            case ">=":
+              localFiltered = localFiltered.filter((item) => item.price >= parseInt(searchPrice.and.value))
+              break;
+            case "<":
+              localFiltered = localFiltered.filter((item) => item.price < parseInt(searchPrice.and.value))
+              break;
+            case "<=":
+              localFiltered = localFiltered.filter((item) => item.price <= parseInt(searchPrice.and.value))
+              break;
+
+            default:
+              break;
+          }
+        }
+
+        filtered.push(localFiltered);
+      }
+      // Everything up before this pushes an array into another array so lets flatten it
+      filtered = filtered.flat();
+
+      // Count the duplicates of the item. "Wait there can be duplicates?" Yes.
+      const itemCounter: any = {};
+      for (const item of filtered) {
+        if (itemCounter[item.id] == null) {
+          itemCounter[item.id] = 0;
+        }
+        itemCounter[item.id] += 1;
+      }
+
+      // If its not empty string
+      if (treeKeys.length > 1 && treeKeys[0] != "rawText") {
+        // Remove non duplicate entry
+        // We do this because relation between filter are AND which mean only the thing that fullfill ALL OF THEM are allowed.
+        // And if they fullfill all of them then it has to be AND.
+        // If you think this is complicated shut the fuck up.
+        const noColon = treeKeys.filter((value) => value != 'semicolon');
+        filtered = filtered.filter((item) => itemCounter[item.id] != noColon.length ? false : true)
+      }
+      filtered = filtered.filter((item, index, array) => {
+        return array.indexOf(item) === index;
+      })
+      return filtered.flat();
+    },
+  },
   watch: {
     searchQuery: function (val) {
       const input = val;
@@ -149,7 +280,7 @@ export default {
       } else {
         const visitor = new CustomVisitor<any>();
         const result = visitor.visit(tree);
-        console.log(result);
+        this.searchQueryTree = result;
       }
     }
   }
